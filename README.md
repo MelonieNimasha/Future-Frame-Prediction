@@ -7,9 +7,9 @@ This shows how to finetune different stable diffusion model checkpoints for diff
 
 # Guildlines
 
-conda create --name <env name>
+conda create --name env_name
 <br />
-conda activate <env name>
+conda activate env_name
 <br />
 pip3 install diffusers["torch"] transformers
 <br />
