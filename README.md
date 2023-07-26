@@ -19,8 +19,11 @@ huggingface-cli login
 
 ### Finetune
 cd example/text_to_image
+<br />
 (Move text_to_image/lora_test.sh into the directory)
+<br />
 chmod +x lora_test.sh
+<br />
 ./lora_test.sh
 
 ### Inference
