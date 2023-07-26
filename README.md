@@ -48,11 +48,6 @@ chmod +x lora_test.sh
 <br />
 python3 inference_text_to_image_lora.py
 
-###Reference 
-
-https://huggingface.co/blog/lora
-
-
 ## Inpaint
 
 ### Finetune
@@ -69,7 +64,10 @@ chmod +x inpaint_lora_test.sh
 <br />
 python3 inference_inpaint_lora.py
 
+## Reference 
 
+https://huggingface.co/blog/lora
+https://huggingface.co/runwayml/stable-diffusion-inpainting
 
 
 
