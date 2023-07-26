@@ -15,12 +15,12 @@ pip3 install -e ".[flax]"
 huggingface-cli login 
 (Enter token from https://huggingface.co/settings/tokens , create a token with write access)
 
-## Text-to-Image
+## Text-to-Image 
 
 ### Finetune
 cd example/text_to_image
 <br />
-(Move text_to_image/lora_test.sh into the directory)
+(Move text_to_image/lora_test.sh file into the directory)
 <br />
 chmod +x lora_test.sh
 <br />
@@ -29,6 +29,19 @@ chmod +x lora_test.sh
 ### Inference
 python3 inference_text_to_image_lora.py
 
+## Inpaint
+
+### Finetune
+cd example/research_projects/dreambooth_inpaint
+<br />
+(Move inpaint/inpaint_lora_test.sh file into the directory)
+<br />
+chmod +x inpaint_lora_test.sh
+<br />
+./inpaint_lora_test.sh
+
+### Inference
+python3 inference_inpaint_lora.py
 
 
 
