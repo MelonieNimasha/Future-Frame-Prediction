@@ -67,6 +67,7 @@ python3 inference_inpaint_lora.py
 ## Reference 
 
 https://huggingface.co/blog/lora
+<br />
 https://huggingface.co/runwayml/stable-diffusion-inpainting
 
 
