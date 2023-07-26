@@ -34,6 +34,8 @@ chmod +x lora_test.sh
 ./lora_test.sh
 
 ### Inference
+(Move inpaint/ inference_text_to_image_lora.py file into the directory)
+<br />
 python3 inference_text_to_image_lora.py
 
 ## Inpaint
@@ -41,13 +43,15 @@ python3 inference_text_to_image_lora.py
 ### Finetune
 cd example/research_projects/dreambooth_inpaint
 <br />
-(Move inpaint/inpaint_lora_test.sh file into the directory)
+(Move inpaint/inpaint_lora_test.sh file and inpaint/video_frames into the directory)
 <br />
 chmod +x inpaint_lora_test.sh
 <br />
 ./inpaint_lora_test.sh
 
 ### Inference
+(Move inpaint/inference_inpaint_lora.py file into the directory)
+<br />
 python3 inference_inpaint_lora.py
 
 
