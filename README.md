@@ -5,7 +5,8 @@ This shows how to finetune different stable diffusion model checkpoints for diff
 * Finetuning stable-diffusion-inpainting for image_to_image generation and inferencing using finetuned model 
 * Finetuning stable-diffusion-inpainting for future frame generation and inferencing using finetuned model (in progress)
 
-# 
+# Setup
+
 conda create --name env_name
 <br />
 conda activate env_name
