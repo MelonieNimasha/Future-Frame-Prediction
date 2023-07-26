@@ -1,9 +1,11 @@
 # Future-Frame-Prediction
 
 This shows how to finetune different stable diffusion model checkpoints for different tasks.
-* Finetuning stable-diffusion-v1-5 for text_to_image generation and inferencing using finetuned model [done]
-* Finetuning stable-diffusion-inpainting for image_to_image generation and inferencing using finetuned model [done]
-* Finetuning stable-diffusion-inpainting for future frame generation and inferencing using finetuned model [in progress]
+* Finetuning stable-diffusion-v1-5 for text_to_image generation and inferencing using finetuned model 
+* Finetuning stable-diffusion-inpainting for image_to_image generation and inferencing using finetuned model
+* Finetuning stable-diffusion-inpainting for future frame generation and inferencing using finetuned model 
+
+# Guildlines
 
 conda create --name <env name>
 conda activate <env name>
