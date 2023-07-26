@@ -8,16 +8,26 @@ This shows how to finetune different stable diffusion model checkpoints for diff
 # Guildlines
 
 conda create --name <env name>
+<br />
 conda activate <env name>
+<br />
 pip3 install diffusers["torch"] transformers
+<br />
 pip3 install diffusers["flax"] transformers
+<br />
 pip3 install accelerate
+<br />
 pip3 install git+https://github.com/huggingface/diffusers
+<br />
 
 git clone https://github.com/huggingface/diffusers.git
+<br />
 cd diffusers
+<br />
 pip3 install -e ".[torch]"
+<br />
 pip3 install -e ".[flax]"
+<br />
 
 huggingface-cli login 
 (Enter token from https://huggingface.co/settings/tokens , create a token with write access)
