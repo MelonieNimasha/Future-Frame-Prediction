@@ -66,7 +66,7 @@ python3 inference_inpaint_lora.py
 
 ## Future Frame Generation
 
-### Data Prepation
+### Data Preparation
 
 pip3 install cv2
 <br />
