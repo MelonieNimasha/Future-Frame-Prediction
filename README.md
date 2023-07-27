@@ -65,10 +65,13 @@ chmod +x inpaint_lora_test.sh
 python3 inference_inpaint_lora.py
 
 ## Reference 
-
+https://github.com/huggingface/diffusers/tree/main
+<br />
 https://huggingface.co/blog/lora
 <br />
 https://huggingface.co/runwayml/stable-diffusion-inpainting
+
+
 
 
 
