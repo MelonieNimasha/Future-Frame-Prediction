@@ -64,6 +64,21 @@ chmod +x inpaint_lora_test.sh
 <br />
 python3 inference_inpaint_lora.py
 
+## Future Frame Generation
+
+### Data Prepation
+
+pip3 install cv2
+<br />
+pip3 install pillow
+<br />
+cd Future_Frame_Generation/data_prep
+<br />
+copy the file path of video to "video_path" and existing video frame count in the dataset to saved_count
+<br />
+python3 frame_extractor.py
+
+
 ## Reference 
 https://github.com/huggingface/diffusers/tree/main
 <br />
