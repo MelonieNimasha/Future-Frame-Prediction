@@ -1,4 +1,4 @@
-# Future-Frame-Generation
+# Future Frame Generation with Stable Diffusion Model
 
 This shows how to finetune different stable diffusion model checkpoints for different tasks using Low Rank Adaptation (LoRA). 
 * Finetuning stable-diffusion-v1-5 for text_to_image generation and inferencing using finetuned model 
