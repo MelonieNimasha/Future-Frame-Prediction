@@ -84,6 +84,14 @@ python3 image_process.py
 
 ### Finetune
 
+cd example/research_projects/dreambooth_inpaint
+<br />
+(Move future_frame_generation/ffp_lora_double_cond.sh file)
+<br />
+chmod +x ffp_lora_double_cond.sh
+<br />
+./ffp_lora_double_cond.sh
+
 
 ### Inference
 
