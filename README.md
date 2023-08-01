@@ -86,7 +86,7 @@ python3 image_process.py
 
 cd example/research_projects/dreambooth_inpaint
 <br />
-(Move future_frame_generation/ffp_lora_double_cond.sh and future_frame_generation/inference_ffp_double_cond.py file into the directory)
+(Move future_frame_generation/ffp_lora_double_cond.sh and future_frame_generation/ffp.py files into the directory)
 <br />
 chmod +x ffp_lora_double_cond.sh
 <br />
@@ -94,6 +94,10 @@ chmod +x ffp_lora_double_cond.sh
 
 
 ### Inference
+
+(Move inpaint/inference_ffp_double_cond.py file into the directory)
+<br />
+python3 inference_ffp_double_cond.py
 
 
 ## Reference 
