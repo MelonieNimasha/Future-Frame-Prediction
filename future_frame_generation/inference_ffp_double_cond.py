@@ -12,7 +12,7 @@ def open_image(path):
   return PIL.Image.open(path).convert("RGB")
 
 # LoRA weights ~3 MB
-model_path = "Melonie/ffp-test-lora"
+model_path = "Melonie/ffp-double-cond-lora"
 
 info = model_info(model_path)
 model_base = info.cardData["base_model"]
