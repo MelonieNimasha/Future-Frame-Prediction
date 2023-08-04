@@ -2,6 +2,8 @@ import cv2
 import PIL
 from PIL import Image
 import os
+import shutil
+import sys
 
 def process_image(path):
   im = PIL.Image.open(path).convert("RGB")
@@ -27,7 +29,15 @@ def compare_and_remove_files(folder_paths):
             os.remove(file_path)
             print(f"Removed: {file_path}")
 
-def extract_frames(video_path, output_path_target, output_path_prev, output_path_prev_prev, saved_count=0, frame_rate=0.5):
+def find_next_non_existing_integer(folder_path, base_filename):
+    i = 0
+    while True:
+        filename = os.path.join(folder_path, f"{base_filename}_{i}.jpg")
+        if not os.path.exists(filename):
+            return i
+        i += 1
+
+def extract_frames(video_path, output_path_target, output_path_prev, output_path_prev_prev, saved_count=0, frame_rate=1):
     # Open the video file
     video = cv2.VideoCapture(video_path)
     
@@ -88,10 +98,103 @@ def extract_frames(video_path, output_path_target, output_path_prev, output_path
     compare_and_remove_files([output_path_prev_prev, output_path_prev, output_path_target])
     return
 
+def create_folder(folder_path):
+    # Check if the folder already exists
+    if os.path.exists(folder_path):
+        print(f"Folder '{folder_path}' already exists.")
+        # If it exists, remove it and recreate it
+        try:
+            shutil.rmtree(folder_path)
+            print(f"Removed folder '{folder_path}'.")
+        except OSError as e:
+            print(f"Error removing folder '{folder_path}': {e}")
+            return
+
+    # Create the folder
+    try:
+        os.mkdir(folder_path)
+        print(f"Created folder '{folder_path}'.")
+    except OSError as e:
+        print(f"Error creating folder '{folder_path}': {e}")
+
+def process_videos_in_folder(video_folder_path, output_path_target, output_path_prev, output_path_prev_prev, frame_rate=3):
+
+    #create new output files
+    
+        
+    # Get a list of video file paths in the video folder
+    video_files = [f for f in os.listdir(video_folder_path) if f.endswith('.avi') or f.endswith('.mp4')]
+    
+    # Process each video file
+    for video_file in video_files:
+        video_path = os.path.join(video_folder_path, video_file)
+        n = find_next_non_existing_integer(output_path_target, "frame" )
+        extract_frames(video_path, output_path_target, output_path_prev, output_path_prev_prev, frame_rate=frame_rate, saved_count = n)
+
+def pixel_wise_difference(image1_path, image2_path):
+    # Open the two images
+    image1 = Image.open(image1_path)
+    image2 = Image.open(image2_path)
+
+    # Ensure the images have the same size
+    if image1.size != image2.size:
+        raise ValueError("Images must have the same size.")
+
+    # Get the pixel data for both images
+    pixels1 = image1.load()
+    pixels2 = image2.load()
+
+    # Create a new image to store the pixel-wise difference
+    diff_image = Image.new('RGB', image1.size)
+    pixels_diff = diff_image.load()
+
+    # Calculate the pixel-wise difference
+    for x in range(image1.width):
+        for y in range(image1.height):
+            r_diff = 2*abs(pixels1[x, y][0] - pixels2[x, y][0])
+            g_diff = 2*abs(pixels1[x, y][1] - pixels2[x, y][1])
+            b_diff = 2*abs(pixels1[x, y][2] - pixels2[x, y][2])
+            pixels_diff[x, y] = (r_diff, g_diff, b_diff)
+
+    return diff_image
+
+def process_images(input_folder1, input_folder2, output_folder):
+    # Ensure the output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Get a list of image filenames from the first input folder
+    image_filenames = os.listdir(input_folder1)
+
+    for filename in image_filenames:
+        # Build the full paths to the images in both input folders
+        image1_path = os.path.join(input_folder1, filename)
+        image2_path = os.path.join(input_folder2, filename)
+
+        # Perform pixel-wise difference and get the resulting image
+        diff_image = pixel_wise_difference(image1_path, image2_path)
+
+        # Save the resulting image to the output folder with the same name
+        output_path = os.path.join(output_folder, filename)
+        diff_image.save(output_path)
 
 # Usage example
-video_path = "v_tennis_01_07.avi"
-output_path_prev_prev = "prev_previous_frames"
-output_path_prev = "previous_frames"
-output_path_target = "target_frames"
-extract_frames(video_path, output_path_target,output_path_prev,output_path_prev_prev, frame_rate=2)
+
+def create_data(video_folder_path):
+    output_path_prev_prev = os.path.join(video_folder_path, "prev_previous_frames")
+    output_path_prev = os.path.join(video_folder_path, "previous_frames")
+    output_path_target = os.path.join(video_folder_path, "target_frames")
+    output_processed = os.path.join(video_folder_path, "processed_frames")
+    for each in [output_path_target,output_path_prev, output_path_prev_prev, output_processed]:
+            create_folder(each)
+
+    process_videos_in_folder(video_folder_path, output_path_target, output_path_prev, output_path_prev_prev)
+    process_images(output_path_prev_prev,output_path_prev,output_processed)
+    return
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python script_name.py video_folder_path")
+    else:
+        video_folder_path = sys.argv[1]
+        create_data(video_folder_path)
