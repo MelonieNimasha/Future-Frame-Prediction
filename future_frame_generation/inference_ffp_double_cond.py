@@ -28,7 +28,7 @@ pipe.to("cuda")
 image = open_image('previous_frames/frame_0.jpg').resize((512, 512))
 image2 = open_image('processed_frames/frame_0.jpg').resize((512, 512))
 prompt = "tennis"
-guidance_scale=7.5
+guidance_scale=0
 num_samples = 1
 generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to get different results
 
@@ -40,4 +40,4 @@ images = pipe(
     generator=generator,
     num_images_per_prompt=num_samples,
 ).images
-images[0].save("generated_frames_test/ffp_doublecond_high_rate.png")
+images[0].save("generated_frames_test/ffp_doublecond_0.png")
