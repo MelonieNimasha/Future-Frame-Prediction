@@ -28,6 +28,8 @@ pip3 install -e ".[torch]"
 <br />
 pip3 install -e ".[flax]"
 <br />
+pip3 install scikit-image
+<br />
 
 huggingface-cli login 
 (Enter token from https://huggingface.co/settings/tokens , create a token with write access)
