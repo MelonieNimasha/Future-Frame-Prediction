@@ -74,13 +74,9 @@ pip3 install pillow
 <br />
 cd Future_Frame_Generation/data_prep
 <br />
-copy the file path of video to "video_path" and existing video frame count in the dataset to saved_count
-<br />
-python3 frame_extractor.py
-<br />
-mkdir processed_images
-<br />
-python3 image_process.py
+python3 frame_extractor.py <path-to-folder_of_videos>
+
+
 
 ### Finetune
 
