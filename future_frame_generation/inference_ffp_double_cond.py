@@ -25,8 +25,8 @@ pipe.unet.load_attn_procs(model_path)
 pipe.to("cuda")
 
 
-image = open_image('previous_frames/frame_0.jpg').resize((512, 512))
-image2 = open_image('processed_frames/frame_0.jpg').resize((512, 512))
+image = open_image('data_prep/test_small/previous_frames/frame_0.jpg').resize((512, 512))
+image2 = open_image('data_prep/test_small/processed_frames/frame_0.jpg').resize((512, 512))
 prompt = "tennis"
 guidance_scale=0
 num_samples = 1
