@@ -72,7 +72,7 @@ pip3 install cv2
 <br />
 pip3 install pillow
 <br />
-cd Future_Frame_Generation/data_prep
+cd future_Frame_Generation/data_prep
 <br />
 python3 frame_extractor.py <path-to-folder_of_videos>
 
@@ -91,7 +91,7 @@ chmod +x ffp_lora_double_cond.sh
 
 ### Inference
 
-(Move inpaint/inference_ffp_double_cond.py file into the directory)
+(Move files and folders in the future_frame_generation folder into the directory)
 <br />
 python3 inference_ffp_double_cond.py
 
