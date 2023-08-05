@@ -1,8 +1,8 @@
 export MODEL_NAME="runwayml/stable-diffusion-inpainting"
 export HUB_MODEL_ID="ffp-double-cond-lora"
-export DATA_PATH="target_frames"
-export COND_PATH="previous_frames"
-export COND_PATH2="processed_frames"
+export DATA_PATH="data_prep/test_small/target_frames"
+export COND_PATH="data_prep/test_small/previous_frames"
+export COND_PATH2="data_prep/test_small/processed_frames"
 export TEXT_TARGET="tennis"
 
 accelerate launch --mixed_precision="fp16"  ffp.py \
