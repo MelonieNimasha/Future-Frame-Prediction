@@ -68,34 +68,3 @@ print("SSIM", ssim_results)
 
 
 
-# import os
-
-# def psnr(img1, img2):
-#     mse = np.mean((img1 - img2) ** 2)
-#     if mse == 0:
-#         return float('inf')
-#     pixel_max = 255.0
-#     psnr_value = 20 * np.log10(pixel_max / np.sqrt(mse))
-#     return psnr_value
-
-# # Assuming you already have 'image', 'image2', 'image3', and 'images' defined
-
-# # Calculate PSNR between image3 and each image in the 'images' list
-# psnr_values = []
-# for generated_image in images:
-#     generated_np = np.array(generated_image)
-#     image3_np = np.array(image3)
-#     psnr_values.append(psnr(generated_np, image3_np))
-
-# # Find the index of the image with maximum PSNR
-# max_psnr_index = np.argmax(psnr_values)
-
-# ssim_val = calculate_ssim(image3, image_path2)
-
-# # Save the image with maximum PSNR
-# out_path = "generated_frames/ffp_doublecond_high_rate.png"
-# images[max_psnr_index].save(out_path)
-
-# ssim_val = calculate_ssim(image3, out_path)
-# psnr_val = max(psnr_values)
-
