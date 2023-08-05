@@ -91,8 +91,6 @@ chmod +x ffp_lora_double_cond.sh
 
 ### Inference
 
-(Move files and folders in the future_frame_generation folder into the directory)
-<br />
 python3 inference_ffp_double_cond.py
 
 
