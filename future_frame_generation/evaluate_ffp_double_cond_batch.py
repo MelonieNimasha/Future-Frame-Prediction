@@ -7,12 +7,20 @@ import torch
 import os
 from skimage import io
 from skimage.metrics import structural_similarity as ssim
+from torchvision import transforms
 
 import PIL
 from diffusers import StableDiffusionInpaintPipeline, DPMSolverMultistepScheduler
 
-def open_image(path):
-  return PIL.Image.open(path).convert("RGB")
+
+image_transforms = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize([0.5], [0.5]),
+])
+
+def open_image(path, im_type = "RGB"):
+  return PIL.Image.open(path).convert(im_type)
+
 
 def psnr(img1, img2):
     mse = np.mean((img1 - img2) ** 2)
@@ -28,7 +36,7 @@ def calculate_ssim(image_path1, image_path2):
     return ssim(image1_read, image2_read, data_range=image2_read.max() - image2_read.min())
 
 # LoRA weights ~3 MB
-model_path = "Melonie/ffp-double-cond-lora-1"
+model_path = "outsample1"
 
 model_base = "runwayml/stable-diffusion-inpainting" 
 
@@ -61,7 +69,7 @@ for i in range(len(image_paths)):
     image3_path = os.path.join(target_frames, image3_paths[i])
 
     image = open_image(image_path).resize((512, 512))
-    image2 = open_image(image2_path).resize((512, 512))
+    image2 = open_image(image2_path, im_type = "L").resize((512, 512))
     image3 = open_image(image3_path).resize((512, 512))
 
     images = pipe(

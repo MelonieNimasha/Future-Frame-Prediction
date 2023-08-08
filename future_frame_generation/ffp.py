@@ -314,6 +314,10 @@ def parse_args():
 
     return args
 
+def binarize_tensor(tensor, threshold):
+    binary_tensor = tensor > threshold
+    binary_tensor = binary_tensor.float()
+    return binary_tensor
 
 class DreamBoothDataset(Dataset):
     """
@@ -373,10 +377,16 @@ class DreamBoothDataset(Dataset):
             ]
         )
 
-        self.image_transforms = transforms.Compose(
+        self.image_transforms_normalize = transforms.Compose(
             [
                 transforms.ToTensor(),
                 transforms.Normalize([0.5], [0.5]),
+            ]
+        )
+
+        self.image_transforms = transforms.Compose(
+            [
+                transforms.ToTensor()
             ]
         )
 
@@ -402,9 +412,9 @@ class DreamBoothDataset(Dataset):
         cond_image2 = self.image_transforms_resize_and_crop(cond_image2)
 
         example["PIL_images"] = instance_image
-        example["instance_images"] = self.image_transforms(instance_image)
-        example["cond_images2"] =  self.image_transforms(cond_image2).reshape([1,1,self.size,self.size])
-        example["cond_images"] =  self.image_transforms(cond_image)
+        example["instance_images"] = self.image_transforms_normalize(instance_image)
+        example["cond_images2"] =  binarize_tensor(self.image_transforms(cond_image2).reshape([1,1,self.size,self.size]), 0.5)
+        example["cond_images"] =  self.image_transforms_normalize(cond_image)
 
         example["instance_prompt_ids"] = self.tokenizer(
             self.instance_prompt,
