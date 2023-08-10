@@ -1,6 +1,6 @@
 # Future Frame Generation with Stable Diffusion Model
 
-This shows how to Finetune stable-diffusion-inpainting for future frame generation and inferencing using finetuned model (in progress)
+This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame generation and inferencing using finetuned model.
 
 # Setup
 
