@@ -20,51 +20,6 @@ pip3 install accelerate
 pip3 install git+https://github.com/huggingface/diffusers
 <br />
 
-git clone https://github.com/huggingface/diffusers.git
-<br />
-cd diffusers
-<br />
-pip3 install -e ".[torch]"
-<br />
-pip3 install -e ".[flax]"
-<br />
-pip3 install scikit-image
-<br />
-
-huggingface-cli login 
-(Enter token from https://huggingface.co/settings/tokens , create a token with write access)
-
-## Text-to-Image 
-
-### Finetune
-cd example/text_to_image
-<br />
-(Move text_to_image/lora_test.sh file into the directory)
-<br />
-chmod +x lora_test.sh
-<br />
-./lora_test.sh
-
-### Inference
-(Move inpaint/ inference_text_to_image_lora.py file into the directory)
-<br />
-python3 inference_text_to_image_lora.py
-
-## Inpaint
-
-### Finetune
-cd example/research_projects/dreambooth_inpaint
-<br />
-(Move inpaint/inpaint_lora_test.sh file and inpaint/video_frames into the directory)
-<br />
-chmod +x inpaint_lora_test.sh
-<br />
-./inpaint_lora_test.sh
-
-### Inference
-(Move inpaint/inference_inpaint_lora.py file into the directory)
-<br />
-python3 inference_inpaint_lora.py
 
 ## Future Frame Generation
 
@@ -82,10 +37,6 @@ python3 frame_extractor.py <path-to-folder_of_videos>
 
 ### Finetune
 
-cd example/research_projects/dreambooth_inpaint
-<br />
-(Move files and folders in the future_frame_generation folder into the directory)
-<br />
 chmod +x ffp_lora_double_cond.sh
 <br />
 ./ffp_lora_double_cond.sh
