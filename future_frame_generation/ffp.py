@@ -360,6 +360,12 @@ class DreamBoothDataset(Dataset):
         self.instance_prompt = instance_prompt
         self._length = self.num_instance_images
 
+        print(self.instance_images_path)
+        print("next")
+        print(self.cond_images_path)
+        print("next")
+        print(self.cond_images_path2)
+
         if class_data_root is not None:
             self.class_data_root = Path(class_data_root)
             self.class_data_root.mkdir(parents=True, exist_ok=True)
