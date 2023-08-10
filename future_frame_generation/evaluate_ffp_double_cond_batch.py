@@ -51,9 +51,9 @@ guidance_scale=0
 num_samples = 4
 generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to get different results
 
-previous_frames = "test_small/previous_frames"
-processed_frames = "test_small/processed_frames"
-target_frames = "test_small/target_frames"
+previous_frames = "data_prep/test_small/previous_frames"
+processed_frames = "data_prep/test_small/processed_frames"
+target_frames = "data_prep/test_small/target_frames"
 # previous_frames = "previous_frames"
 # processed_frames = "processed_frames"
 # target_frames = "target_frames"
@@ -98,11 +98,11 @@ for i in range(len(image_paths)):
     max_psnr_index = np.argmax(psnr_values)
 
     # Save the image with maximum PSNR
-    if os.path.exists("test_small/generated_frames") and os.path.isdir("test_small/generated_frames"):
+    if os.path.exists("data_prep/test_small/generated_frames") and os.path.isdir("data_prep/test_small/generated_frames"):
         print()
     else:
-        os.mkdir("test_small/generated_frames")
-    out_path = f"test_small/generated_frames/ffp_doublecond_{i}.jpg"
+        os.mkdir("data_prep/test_small/generated_frames")
+    out_path = f"data_prep/test_small/generated_frames/ffp_doublecond_{i}.jpg"
     # out_path = f"generated_frames/ffp_doublecond_{i}.jpg"
 
     images[max_psnr_index].save(out_path)
