@@ -12,7 +12,7 @@ def open_image(path):
   return PIL.Image.open(path).convert("RGB")
 
 # LoRA weights ~3 MB
-model_path = "outsample1"
+model_path = "models/outsample1"
 
 model_base = "runwayml/stable-diffusion-inpainting"  
 
