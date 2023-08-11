@@ -36,7 +36,7 @@ def calculate_ssim(image_path1, image_path2):
     return ssim(image1_read, image2_read, data_range=image2_read.max() - image2_read.min())
 
 # LoRA weights ~3 MB
-model_path = "outsample7"
+model_path = "outsample1"
 
 model_base = "runwayml/stable-diffusion-inpainting" 
 
