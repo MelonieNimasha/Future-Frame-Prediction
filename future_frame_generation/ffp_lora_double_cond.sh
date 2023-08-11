@@ -14,9 +14,9 @@ accelerate launch --mixed_precision="fp16"  ffp.py \
   --class_prompt=$TEXT_TARGET \
   --train_batch_size=3 \
   --sample_batch_size=1 \
-  --output_dir="outsample1_test" \
+  --output_dir="outsample7" \
   --gradient_accumulation_steps=1 \
-  --max_train_steps=1\
+  --max_train_steps=25000\
   --learning_rate=1e-04 \
   --lr_scheduler="cosine" --lr_warmup_steps=0 \
   --checkpointing_steps=5000 \
