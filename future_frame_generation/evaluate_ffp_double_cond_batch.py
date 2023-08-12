@@ -35,8 +35,27 @@ def calculate_ssim(image_path1, image_path2):
     image2_read = io.imread(image_path2, as_gray=True)
     return ssim(image1_read, image2_read, data_range=image2_read.max() - image2_read.min())
 
+def replace_pixels(new_image, image1, image2):
+    if image1.size != image2.size or new_image.size != image1.size:
+        raise ValueError("Image sizes must match.")
+
+    new_pixels = new_image.load()
+    pixels1 = image1.load()
+    pixels2 = image2.load()
+
+    result_image = PIL.Image.new('RGB', image1.size)
+
+    for x in range(image1.width):
+        for y in range(image1.height):
+            if new_pixels[x, y] == 0:
+                result_image.putpixel((x, y), pixels1[x, y])
+            else:
+                result_image.putpixel((x, y), pixels2[x, y])
+
+    return result_image
+
 # LoRA weights ~3 MB
-model_path = "models/outsample1"
+model_path = "models/outsample_test"
 
 model_base = "runwayml/stable-diffusion-inpainting" 
 
@@ -52,33 +71,34 @@ num_samples = 4
 generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to get different results
 
 previous_frames = "data_prep/one_sample/previous_frames"
-processed_frames = "data_prep/one_sample/processed_frames"
 target_frames = "data_prep/one_sample/target_frames"
+processed_frames_relaxed = "data_prep/one_sample/processed_frames_relaxed"
 # previous_frames = "previous_frames"
 # processed_frames = "processed_frames"
 # target_frames = "target_frames"
 
-image_paths = os.listdir(previous_frames) 
-image2_paths = os.listdir(processed_frames)  
-image3_paths = os.listdir(target_frames)  
+previous = os.listdir(previous_frames) 
+target = os.listdir(target_frames)  
+processed = os.listdir(processed_frames_relaxed) 
 
 # Initialize lists to store results
 all_psnr_values = []
 all_ssim_values = []
 
-for i in range(len(image_paths)):
-    image_path = os.path.join(previous_frames, image_paths[i])
-    image2_path = os.path.join(processed_frames, image2_paths[i])
-    image3_path = os.path.join(target_frames, image3_paths[i])
+for i in range(len(previous)):
+    prev_path = os.path.join(previous_frames, previous[i])
+    target_path = os.path.join(target_frames, target[i])
+    processed_path = os.path.join(processed_frames_relaxed, processed[i])
 
-    image = open_image(image_path).resize((512, 512))
-    image2 = open_image(image2_path, im_type = "L").resize((512, 512))
-    image3 = open_image(image3_path).resize((512, 512))
+
+    previous_image = open_image(prev_path).resize((512, 512))
+    target_image = open_image(target_path).resize((512, 512))
+    processed_image = open_image(processed_path, im_type = "L").resize((512, 512))
 
     images = pipe(
         prompt=prompt,
-        image=image,
-        mask_image=image2,
+        image=previous_image,
+        mask_image=processed_image,
         guidance_scale=guidance_scale,
         generator=generator,
         num_images_per_prompt=num_samples,
@@ -91,8 +111,8 @@ for i in range(len(image_paths)):
     psnr_values = []
     for generated_image in images:
         generated_np = np.array(generated_image)
-        image3_np = np.array(image3)
-        psnr_values.append(psnr(generated_np, image3_np))
+        target_np = np.array(target_image)
+        psnr_values.append(psnr(generated_np, target_np))
 
     # Find the index of the image with maximum PSNR
     max_psnr_index = np.argmax(psnr_values)
@@ -104,13 +124,15 @@ for i in range(len(image_paths)):
         os.mkdir("data_prep/one_sample/generated_frames")
     out_path = f"data_prep/one_sample/generated_frames/ffp_doublecond_{i}.jpg"
     # out_path = f"generated_frames/ffp_doublecond_{i}.jpg"
-
-    images[max_psnr_index].save(out_path)
+    
+    im_out = replace_pixels(processed_image, previous_image, images[max_psnr_index])
+    generated_np_new = np.array(im_out)
+    im_out.save(out_path)
     print("image ",out_path, " saved")
 
     # Evaluate the model on sample
-    ssim_val = calculate_ssim(image3_path, out_path)
-    psnr_val = max(psnr_values)
+    ssim_val = calculate_ssim(target_path, out_path)
+    psnr_val = psnr(target_np, generated_np_new)
 
     all_psnr_values.append(psnr_val)
     all_ssim_values.append(ssim_val)
