@@ -1,9 +1,9 @@
 export MODEL_NAME="runwayml/stable-diffusion-inpainting"
 export DATA_PATH="data_prep/one_sample/target_frames"
 export COND_PATH="data_prep/one_sample/previous_frames"
-export COND_PATH2="data_prep/one_sample/processed_frames_relaxed"
+export COND_PATH2="data_prep/one_sample/processed_frames"
 export TEXT_TARGET="tennis"
-export MODEL_OUT="models/outsample_test"
+export MODEL_OUT="models/outsample1"
 
 accelerate launch --mixed_precision="fp16"  ffp.py \
   --pretrained_model_name_or_path=$MODEL_NAME \

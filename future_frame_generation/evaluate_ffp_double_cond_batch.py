@@ -55,7 +55,7 @@ def replace_pixels(new_image, image1, image2):
     return result_image
 
 # LoRA weights ~3 MB
-model_path = "models/outsample_test"
+model_path = "models/outsample1"
 
 model_base = "runwayml/stable-diffusion-inpainting" 
 
@@ -72,6 +72,7 @@ generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to g
 
 previous_frames = "data_prep/one_sample/previous_frames"
 target_frames = "data_prep/one_sample/target_frames"
+processed_frames = "data_prep/one_sample/processed_frames"
 processed_frames_relaxed = "data_prep/one_sample/processed_frames_relaxed"
 # previous_frames = "previous_frames"
 # processed_frames = "processed_frames"
@@ -79,6 +80,7 @@ processed_frames_relaxed = "data_prep/one_sample/processed_frames_relaxed"
 
 previous = os.listdir(previous_frames) 
 target = os.listdir(target_frames)  
+process = os.listdir(processed_frames)  
 processed = os.listdir(processed_frames_relaxed) 
 
 # Initialize lists to store results
@@ -88,17 +90,20 @@ all_ssim_values = []
 for i in range(len(previous)):
     prev_path = os.path.join(previous_frames, previous[i])
     target_path = os.path.join(target_frames, target[i])
+    process_path = os.path.join(processed_frames, process[i])
     processed_path = os.path.join(processed_frames_relaxed, processed[i])
 
 
     previous_image = open_image(prev_path).resize((512, 512))
     target_image = open_image(target_path).resize((512, 512))
+    process_image = open_image(process_path, im_type = "L").resize((512, 512))
     processed_image = open_image(processed_path, im_type = "L").resize((512, 512))
+    
 
     images = pipe(
         prompt=prompt,
         image=previous_image,
-        mask_image=processed_image,
+        mask_image=process_image,
         guidance_scale=guidance_scale,
         generator=generator,
         num_images_per_prompt=num_samples,
