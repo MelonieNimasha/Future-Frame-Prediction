@@ -1,9 +1,10 @@
 import cv2
 import PIL
-from PIL import Image
+from PIL import Image, ImageDraw
 import os
 import shutil
 import sys
+import numpy as np
 
 def process_image(path):
   im = PIL.Image.open(path).convert("RGB")
@@ -151,14 +152,34 @@ def pixel_wise_difference(image1_path, image2_path):
     # Calculate the pixel-wise difference
     for x in range(image1.width):
         for y in range(image1.height):
-            r_diff = 2*abs(pixels1[x, y][0] - pixels2[x, y][0])
-            g_diff = 2*abs(pixels1[x, y][1] - pixels2[x, y][1])
-            b_diff = 2*abs(pixels1[x, y][2] - pixels2[x, y][2])
+            r_diff = abs(pixels1[x, y][0] - pixels2[x, y][0])
+            g_diff = abs(pixels1[x, y][1] - pixels2[x, y][1])
+            b_diff = abs(pixels1[x, y][2] - pixels2[x, y][2])
             pixels_diff[x, y] = (r_diff, g_diff, b_diff)
 
     return diff_image
 
-def process_images(input_folder1, input_folder2, output_folder):
+def add_white_box(binary_image, padding=25):
+    # Find the bounding box coordinates around white pixels
+    non_zero_coords = [(x, y) for x in range(binary_image.width) for y in range(binary_image.height) if binary_image.getpixel((x, y)) > 0]
+    if not non_zero_coords:
+        return binary_image
+
+    min_x = max(0, min(non_zero_coords, key=lambda item: item[0])[0] - padding)
+    min_y = max(0, min(non_zero_coords, key=lambda item: item[1])[1] - padding)
+    max_x = min(binary_image.width - 1, max(non_zero_coords, key=lambda item: item[0])[0] + padding)
+    max_y = min(binary_image.height - 1, max(non_zero_coords, key=lambda item: item[1])[1] + padding)
+
+    # Create a new image with a black background
+    new_image = Image.new('L', binary_image.size, color=0)
+
+    # Draw a white bounding box on the new image
+    draw = ImageDraw.Draw(new_image)
+    draw.rectangle([(min_x, min_y), (max_x, max_y)], outline=255, fill=255)
+
+    return new_image
+
+def process_images(input_folder1, input_folder2, output_folder, output_folder2):
     # Ensure the output folder exists
     os.makedirs(output_folder, exist_ok=True)
 
@@ -173,9 +194,24 @@ def process_images(input_folder1, input_folder2, output_folder):
         # Perform pixel-wise difference and get the resulting image
         diff_image = pixel_wise_difference(image1_path, image2_path)
 
-        # Save the resulting image to the output folder with the same name
+        # Convert the difference image to grayscale
+        diff_image_gray = diff_image.convert('L')  # 'L' mode for grayscale
+
+        # Apply a binary threshold to create a binary image
+        # You can adjust this threshold value as needed
+        diff_image_bin_relaxed = diff_image_gray.point(lambda p: 0 if p < 25 else 255)
+        diff_image_bin = diff_image_gray.point(lambda p: 0 if p < 112 else 255)
+
+        #Prepare the relaxed mask
+        relaxed_mask = add_white_box(diff_image_bin_relaxed)
+
+
+        # Save the resulting binary image to the output folder with the same name
         output_path = os.path.join(output_folder, filename)
-        diff_image.save(output_path)
+        output_path2 = os.path.join(output_folder2, filename)
+        diff_image_bin.save(output_path)
+        relaxed_mask.save(output_path2)
+        
 
 # Usage example
 
@@ -184,11 +220,12 @@ def create_data(video_folder_path):
     output_path_prev = os.path.join(video_folder_path, "previous_frames")
     output_path_target = os.path.join(video_folder_path, "target_frames")
     output_processed = os.path.join(video_folder_path, "processed_frames")
-    for each in [output_path_target,output_path_prev, output_path_prev_prev, output_processed]:
+    output_processed_relaxed = os.path.join(video_folder_path, "processed_frames_relaxed")
+    for each in [output_path_target,output_path_prev, output_path_prev_prev, output_processed,output_processed_relaxed]:
             create_folder(each)
 
     process_videos_in_folder(video_folder_path, output_path_target, output_path_prev, output_path_prev_prev)
-    process_images(output_path_prev_prev,output_path_prev,output_processed)
+    process_images(output_path_prev_prev,output_path_prev,output_processed,output_processed_relaxed)
     return
 
 
