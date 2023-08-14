@@ -60,7 +60,7 @@ def parse_args():
         type=str,
         default=None,
         required=True,
-        help="A folder containing the training data of previous frames.",
+        help="A folder containing the training data of previous images.",
     )
 
     parser.add_argument(
@@ -68,15 +68,7 @@ def parse_args():
         type=str,
         default=None,
         required=True,
-        help="A folder containing the training data of previous of previous frames.",
-    )
-
-    parser.add_argument(
-        "--threshold",
-        type=int,
-        default=None,
-        required=True,
-        help="Threshold when getting pixel-wise difference.",
+        help="A folder containing the training data of previous of previous images.",
     )
 
     parser.add_argument(
@@ -280,33 +272,6 @@ def parse_args():
 
     return args
 
-def pixel_wise_difference(image1, image2, threshold):
-
-    # Ensure the images have the same size
-    if image1.size != image2.size:
-        raise ValueError("Images must have the same size.")
-
-    # Get the pixel data for both images
-    pixels1 = image1.load()
-    pixels2 = image2.load()
-
-    # Create a new image to store the pixel-wise difference
-    diff_image = Image.new('RGB', image1.size)
-    pixels_diff = diff_image.load()
-
-    # Calculate the pixel-wise difference
-    for x in range(image1.width):
-        for y in range(image1.height):
-            r_diff = abs(pixels1[x, y][0] - pixels2[x, y][0])
-            g_diff = abs(pixels1[x, y][1] - pixels2[x, y][1])
-            b_diff = abs(pixels1[x, y][2] - pixels2[x, y][2])
-            pixels_diff[x, y] = (r_diff, g_diff, b_diff)
-
-    diff_image_gray = diff_image.convert('L')
-    diff_image_bin = diff_image_gray.point(lambda p: 0 if p < threshold else 255)
-
-    return diff_image_bin
-
 class DreamBoothDataset(Dataset):
     """
     A dataset to prepare the instance and class images with the prompts for fine-tuning the model.
@@ -320,7 +285,6 @@ class DreamBoothDataset(Dataset):
         cond_data_root2,
         instance_prompt,
         tokenizer,
-        threshold,
         class_data_root=None,
         class_prompt=None,
         size=512,
@@ -329,7 +293,6 @@ class DreamBoothDataset(Dataset):
         self.size = size
         self.center_crop = center_crop
         self.tokenizer = tokenizer
-        self.threshold = threshold
 
         self.instance_data_root = Path(instance_data_root)
         if not self.instance_data_root.exists():
@@ -341,7 +304,7 @@ class DreamBoothDataset(Dataset):
 
         self.cond_data_root2 = Path(cond_data_root2)
         if not self.cond_data_root2.exists():
-            raise ValueError("Previous of previous frames root doesn't exists.")
+            raise ValueError("Previous frames root doesn't exists.")
 
         self.instance_images_path = list(Path(instance_data_root).iterdir())
         self.cond_images_path = list(Path(cond_data_root).iterdir())
@@ -394,21 +357,17 @@ class DreamBoothDataset(Dataset):
             instance_image = instance_image.convert("RGB")
         if not cond_image.mode == "RGB":
             cond_image = cond_image.convert("RGB")
-        if not cond_image2.mode == "RGB":
-            cond_image2 = cond_image2.convert("RGB")
+        if not cond_image2.mode == "L":
+            cond_image2 = cond_image2.convert("L")
 
         instance_image = self.image_transforms_resize_and_crop(instance_image)
         cond_image = self.image_transforms_resize_and_crop(cond_image)
-        temp_image = self.image_transforms_resize_and_crop(cond_image2)
-        cond_image2 = pixel_wise_difference(cond_image,temp_image,self.threshold)
-        cond_image2.save("temp.jpg")
-
+        cond_image2 = self.image_transforms_resize_and_crop(cond_image2)
 
         example["PIL_images"] = instance_image
         example["instance_images"] = self.image_transforms_normalize(instance_image)
         example["cond_images2"] =  self.image_transforms(cond_image2).reshape([1,1,self.size,self.size])
         example["cond_images"] =  self.image_transforms_normalize(cond_image)
-
 
         example["instance_prompt_ids"] = self.tokenizer(
             self.instance_prompt,
@@ -583,7 +542,17 @@ def main():
 
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
 
-    
+    train_dataset = DreamBoothDataset(
+        instance_data_root=args.instance_data_dir,
+        cond_data_root=args.cond_data_dir,
+        cond_data_root2=args.cond_data_dir2,
+        instance_prompt=args.instance_prompt,
+        class_data_root=args.class_data_dir if args.with_prior_preservation else None,
+        class_prompt=args.class_prompt,
+        tokenizer=tokenizer,
+        size=args.resolution,
+        center_crop=args.center_crop,
+    )
 
     def collate_fn(examples):
         input_ids = [example["instance_prompt_ids"] for example in examples]
@@ -612,18 +581,6 @@ def main():
         batch = {"input_ids": input_ids, "pixel_values": pixel_values, "masks": cond_pixel_values2, "masked_images": cond_pixel_values}
         return batch
 
-    train_dataset = DreamBoothDataset(
-        instance_data_root=args.instance_data_dir,
-        cond_data_root=args.cond_data_dir,
-        cond_data_root2=args.cond_data_dir2,
-        instance_prompt=args.instance_prompt,
-        class_data_root=args.class_data_dir if args.with_prior_preservation else None,
-        class_prompt=args.class_prompt,
-        tokenizer=tokenizer,
-        size=args.resolution,
-        center_crop=args.center_crop,
-        threshold=args.threshold
-    )
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.train_batch_size, shuffle=True, collate_fn=collate_fn
     )
@@ -804,7 +761,6 @@ def main():
                 break
 
         accelerator.wait_for_everyone()
-    
 
     # Save the lora layers
     if accelerator.is_main_process:
