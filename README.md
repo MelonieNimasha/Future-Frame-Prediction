@@ -17,7 +17,6 @@ pip3 install accelerate
 pip3 install git+https://github.com/huggingface/diffusers
 <br />
 
-
 ## Future Frame Generation
 
 ### Data Preparation

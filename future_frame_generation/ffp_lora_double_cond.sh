@@ -1,9 +1,9 @@
 export MODEL_NAME="runwayml/stable-diffusion-inpainting"
-export DATA_PATH="data_prep/one_sample/target_frames"
-export COND_PATH="data_prep/one_sample/previous_frames"
-export COND_PATH2="data_prep/one_sample/processed_frames"
+export DATA_PATH="data_prep/train_small/target_frames"
+export COND_PATH="data_prep/train_small/previous_frames"
+export COND_PATH2="data_prep/train_small/processed_frames"
 export TEXT_TARGET="tennis"
-export MODEL_OUT="models/outsample1"
+export MODEL_OUT="models/outsample_test"
 
 accelerate launch --mixed_precision="fp16"  ffp.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
@@ -13,7 +13,7 @@ accelerate launch --mixed_precision="fp16"  ffp.py \
   --cond_data_dir2=$COND_PATH2 \
   --instance_prompt=$TEXT_TARGET \
   --class_prompt=$TEXT_TARGET \
-  --train_batch_size=1 \
+  --train_batch_size=3 \
   --sample_batch_size=1 \
   --output_dir=$MODEL_OUT \
   --gradient_accumulation_steps=1 \
