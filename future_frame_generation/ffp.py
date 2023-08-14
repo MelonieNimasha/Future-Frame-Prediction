@@ -583,18 +583,7 @@ def main():
 
     noise_scheduler = DDPMScheduler.from_pretrained(args.pretrained_model_name_or_path, subfolder="scheduler")
 
-    train_dataset = DreamBoothDataset(
-        instance_data_root=args.instance_data_dir,
-        cond_data_root=args.cond_data_dir,
-        cond_data_root2=args.cond_data_dir2,
-        instance_prompt=args.instance_prompt,
-        class_data_root=args.class_data_dir if args.with_prior_preservation else None,
-        class_prompt=args.class_prompt,
-        tokenizer=tokenizer,
-        size=args.resolution,
-        center_crop=args.center_crop,
-        threshold=args.threshold
-    )
+    
 
     def collate_fn(examples):
         input_ids = [example["instance_prompt_ids"] for example in examples]
@@ -623,6 +612,18 @@ def main():
         batch = {"input_ids": input_ids, "pixel_values": pixel_values, "masks": cond_pixel_values2, "masked_images": cond_pixel_values}
         return batch
 
+    train_dataset = DreamBoothDataset(
+        instance_data_root=args.instance_data_dir,
+        cond_data_root=args.cond_data_dir,
+        cond_data_root2=args.cond_data_dir2,
+        instance_prompt=args.instance_prompt,
+        class_data_root=args.class_data_dir if args.with_prior_preservation else None,
+        class_prompt=args.class_prompt,
+        tokenizer=tokenizer,
+        size=args.resolution,
+        center_crop=args.center_crop,
+        threshold=args.threshold
+    )
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.train_batch_size, shuffle=True, collate_fn=collate_fn
     )
@@ -803,6 +804,7 @@ def main():
                 break
 
         accelerator.wait_for_everyone()
+    
 
     # Save the lora layers
     if accelerator.is_main_process:

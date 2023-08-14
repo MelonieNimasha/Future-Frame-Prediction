@@ -16,7 +16,7 @@ pip3 install accelerate
 <br />
 pip3 install git+https://github.com/huggingface/diffusers
 <br />
-
+pip3 install ray
 
 ## Future Frame Generation
 
