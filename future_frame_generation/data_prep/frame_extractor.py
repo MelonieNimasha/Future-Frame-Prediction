@@ -200,7 +200,7 @@ def process_images(input_folder1, input_folder2, output_folder, output_folder2):
         # Apply a binary threshold to create a binary image
         # You can adjust this threshold value as needed
         diff_image_bin_relaxed = diff_image_gray.point(lambda p: 0 if p < 25 else 255)
-        # diff_image_bin = diff_image_gray.point(lambda p: 0 if p < 112 else 255)
+        diff_image_bin = diff_image_gray.point(lambda p: 0 if p < 112 else 255)
 
         #Prepare the relaxed mask
         relaxed_mask = add_white_box(diff_image_bin_relaxed)

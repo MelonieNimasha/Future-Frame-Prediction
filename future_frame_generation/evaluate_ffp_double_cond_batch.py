@@ -86,12 +86,14 @@ processed = os.listdir(processed_frames_relaxed)
 # Initialize lists to store results
 all_psnr_values = []
 all_ssim_values = []
+start = 0
 
 for i in range(len(previous)):
-    prev_path = os.path.join(previous_frames, previous[i])
-    target_path = os.path.join(target_frames, target[i])
-    process_path = os.path.join(processed_frames, process[i])
-    processed_path = os.path.join(processed_frames_relaxed, processed[i])
+    name = f"frame_{i+start}.jpg"
+    prev_path = os.path.join(previous_frames, name)
+    target_path = os.path.join(target_frames, name)
+    process_path = os.path.join(processed_frames, name)
+    processed_path = os.path.join(processed_frames_relaxed, name)
 
 
     previous_image = open_image(prev_path).resize((512, 512))
@@ -127,7 +129,7 @@ for i in range(len(previous)):
         print()
     else:
         os.mkdir("data_prep/one_sample_test/generated_frames")
-    out_path = f"data_prep/one_sample_test/generated_frames/ffp_doublecond_{i}.jpg"
+    out_path = f"data_prep/one_sample_test/generated_frames/ffp_doublecond_{i+start}.jpg"
     # out_path = f"generated_frames/ffp_doublecond_{i}.jpg"
     
     im_out = replace_pixels(processed_image, previous_image, images[max_psnr_index])
