@@ -468,7 +468,7 @@ def main():
     elif args.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
 
-    # Move text_encode and vae to gpu.
+    # ad.
     # For mixed precision training we cast the text_encoder and vae weights to half-precision
     # as these models are only used for inference, keeping weights in full precision is not required.
     unet.to(accelerator.device, dtype=weight_dtype)
@@ -604,7 +604,6 @@ def main():
         lora_layers, optimizer, train_dataloader, lr_scheduler
     )
     # accelerator.register_for_checkpointing(lr_scheduler)
-
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
     if overrode_max_train_steps:
