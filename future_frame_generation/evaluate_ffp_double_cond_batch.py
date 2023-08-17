@@ -55,7 +55,7 @@ def replace_pixels(new_image, image1, image2):
     return result_image
 
 # LoRA weights ~3 MB
-model_path = "models/outsample_test"
+model_path = "models/outsample6_rate"
 
 model_base = "runwayml/stable-diffusion-inpainting" 
 
@@ -70,10 +70,10 @@ guidance_scale=0
 num_samples = 4
 generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to get different results
 
-previous_frames = "data_prep/train_small_test/previous_frames"
-target_frames = "data_prep/train_small_test/target_frames"
-processed_frames = "data_prep/train_small_test/processed_frames"
-processed_frames_relaxed = "data_prep/train_small_test/processed_frames_relaxed"
+previous_frames = "data_prep/train_small_rate/previous_frames"
+target_frames = "data_prep/train_small_rate/target_frames"
+processed_frames = "data_prep/train_small_rate/processed_frames"
+processed_frames_relaxed = "data_prep/train_small_rate/processed_frames_relaxed"
 # previous_frames = "previous_frames"
 # processed_frames = "processed_frames"
 # target_frames = "target_frames"
@@ -86,7 +86,7 @@ processed = os.listdir(processed_frames_relaxed)
 # Initialize lists to store results
 all_psnr_values = []
 all_ssim_values = []
-start = 1
+start = 0
 
 for i in range(len(previous)):
     name = f"frame_{i+start}.jpg"
@@ -125,11 +125,11 @@ for i in range(len(previous)):
     max_psnr_index = np.argmax(psnr_values)
 
     # Save the image with maximum PSNR
-    if os.path.exists("data_prep/train_small_test/generated_frames") and os.path.isdir("data_prep/one_sample_test/generated_frames"):
+    if os.path.exists("data_prep/train_small_rate/generated_frames") and os.path.isdir("data_prep/one_sample_test/generated_frames"):
         print()
     else:
-        os.mkdir("data_prep/train_small_test/generated_frames")
-    out_path = f"data_prep/train_small_test/generated_frames/ffp_doublecond_{i+start}.jpg"
+        os.mkdir("data_prep/train_small_rate/generated_frames")
+    out_path = f"data_prep/train_small_rate/generated_frames/ffp_doublecond_{i+start}.jpg"
     # out_path = f"generated_frames/ffp_doublecond_{i}.jpg"
     
     im_out = replace_pixels(processed_image, previous_image, images[max_psnr_index])

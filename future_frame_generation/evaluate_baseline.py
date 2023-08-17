@@ -58,8 +58,8 @@ def calculate_average_ssim(folder1, folder2):
     return average_ssim
 
 # Example usage:
-folder1_path = "data_prep/train_small/previous_frames"
-folder2_path = "data_prep/train_small/target_frames"
+folder1_path = "data_prep/train_small_rate/previous_frames"
+folder2_path = "data_prep/train_small_rate/target_frames"
 psnr_results = calculate_average_psnr(folder1_path, folder2_path)
 print("PSNR", psnr_results)
 
