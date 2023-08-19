@@ -38,7 +38,7 @@ def find_next_non_existing_integer(folder_path, base_filename):
             return i
         i += 1
 
-def extract_frames(video_path, output_path_target, output_path_prev, output_path_prev_prev, saved_count=0, frame_rate=2):
+def extract_frames(video_path, output_path_target, output_path_prev, output_path_prev_prev, saved_count=0, frame_rate=3):
     # Open the video file
     video = cv2.VideoCapture(video_path)
     
@@ -118,7 +118,7 @@ def create_folder(folder_path):
     except OSError as e:
         print(f"Error creating folder '{folder_path}': {e}")
 
-def process_videos_in_folder(video_folder_path, output_path_target, output_path_prev, output_path_prev_prev, frame_rate=2):
+def process_videos_in_folder(video_folder_path, output_path_target, output_path_prev, output_path_prev_prev, frame_rate=3):
 
     #create new output files
     
