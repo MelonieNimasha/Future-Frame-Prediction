@@ -1,6 +1,6 @@
 import cv2
 import PIL
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 import os
 import shutil
 import sys
@@ -159,7 +159,7 @@ def pixel_wise_difference(image1_path, image2_path):
 
     return diff_image
 
-def add_white_box(binary_image, padding=25):
+def add_white_box(binary_image, padding=50):
     # Find the bounding box coordinates around white pixels
     non_zero_coords = [(x, y) for x in range(binary_image.width) for y in range(binary_image.height) if binary_image.getpixel((x, y)) > 0]
     if not non_zero_coords:
@@ -179,9 +179,38 @@ def add_white_box(binary_image, padding=25):
 
     return new_image
 
+def larget_connected_component(binary_mask):
+    binary_mask_array = np.array(binary_mask)
+
+    # Label connected components
+    labeled_mask = label(binary_mask_array)
+
+    # Calculate properties of connected components
+    props = regionprops(labeled_mask)
+
+    # Find the largest connected component
+    largest_component = max(props, key=lambda prop: prop.area)
+
+    # Create a new binary mask containing only the largest connected component
+    largest_component_mask = np.zeros_like(binary_mask_array)
+    largest_component_mask[labeled_mask == largest_component.label] = 225
+
+    # Save or use the largest connected component mask as needed
+    largest_component_image = Image.fromarray(largest_component_mask)
+    return largest_component_image
+
+# def dilated_mask(binary_mask):
+#     # Define a structuring element as a 3x3 square
+#     structuring_element = ImageFilter.Kernel((3, 3), [1, 1, 1, 1, 1, 1, 1, 1, 1])
+
+#     # Apply the morphological dilation operation
+#     dilated_mask = binary_mask.filter(ImageFilter.MinFilter(size=3))
+#     return dilated_mask
+
 def process_images(input_folder1, input_folder2, output_folder, output_folder2):
     # Ensure the output folder exists
     os.makedirs(output_folder, exist_ok=True)
+    os.makedirs(output_folder2, exist_ok=True)
 
     # Get a list of image filenames from the first input folder
     image_filenames = os.listdir(input_folder1)
@@ -199,11 +228,14 @@ def process_images(input_folder1, input_folder2, output_folder, output_folder2):
 
         # Apply a binary threshold to create a binary image
         # You can adjust this threshold value as needed
-        diff_image_bin_relaxed = diff_image_gray.point(lambda p: 0 if p < 25 else 255)
+        diff_image_bin_relaxed = diff_image_gray.point(lambda p: 0 if p < 50 else 255)
         diff_image_bin = diff_image_gray.point(lambda p: 0 if p < 112 else 255)
 
         #Prepare the relaxed mask
-        relaxed_mask = add_white_box(diff_image_bin_relaxed)
+        diff_image_bin_cleaned = larget_connected_component(diff_image_bin_relaxed)
+
+        #Prepare the relaxed mask
+        relaxed_mask = add_white_box(diff_image_bin_cleaned)
 
 
         # Save the resulting binary image to the output folder with the same name
