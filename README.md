@@ -24,7 +24,7 @@ After frame extraction from source videos, the dataset will have 3 main folders 
 - cd future_Frame_Generation/data_prep
 - python3 frame_extractor.py <path-to-folder_of_videos>
 - Update input_folder1, input_folder2 and output_folder2 in the mask2_creator.py with folders path to required prev_prevous_frames folder, previous_frames folder and the output folder to contain background correction mask
--python3 mask2_creator.py
+- python3 mask2_creator.py
 
 
 
