@@ -32,6 +32,7 @@ cd future_Frame_Generation/data_prep
 <br />
 python3 frame_extractor.py <path-to-folder_of_videos>
 <br />
+<br />
 Update input_folder1, input_folder2 and output_folder2 in the mask2_creator.py with folders path to required prev_prevous_frames folder, previous_frames folder and the output folder to contain background correction mask
 <br />
 python3 mask2_creator.py
