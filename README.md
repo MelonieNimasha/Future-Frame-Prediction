@@ -21,7 +21,9 @@ pip3 install git+https://github.com/huggingface/diffusers
 
 ### Data Preparation for training and inference
 
-<The dataset contains 3 main folders prev_prevous_frames, previous_frames, and  target_frames, containing corresponding consecutive 3 frames of each data sample. Another 2 folders are created, named processed_frames and processed_frames_relaxed_cleaned, containg the corresponding binary masks for FFP-LDM and the other binary masks for background correction>
+<After frame extraction from source videos, the dataset will have 3 main folders as prev_prevous_frames, previous_frames, and  target_frames, containing corresponding consecutive 3 frames of each data sample. Another 2 folders are created, named processed_frames and processed_frames_relaxed_cleaned, containg the corresponding binary masks for FFP-LDM and the other binary masks for background correction>
+
+data source: tennis swing videos from https://www.crcv.ucf.edu/research/data-sets/ucf-youtube-action/ 
 
 
 pip3 install cv2
