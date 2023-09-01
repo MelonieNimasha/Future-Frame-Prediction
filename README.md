@@ -1,4 +1,4 @@
-# Future Frame Generation with Stable Diffusion Model
+# Future Frame Prediction with Stable Diffusion Model
 
 This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame prediction and inferencing using finetuned model.
 
@@ -41,7 +41,7 @@ python3 mask2_creator.py
 
 ### Finetune
 
-Update the data_path, cond_path, cond_path2, data_path_val, cond_path_val, and cond_path2_val with target_frames, previou_frames, processed_frames folders of training and vaidation datasets
+Update the data_path, cond_path, cond_path2, data_path_val, cond_path_val, and cond_path2_val with target_frames, previous_frames, processed_frames folders of training and vaidation datasets
 <br />
 chmod +x ffp_lora_double_cond.sh
 <br />
