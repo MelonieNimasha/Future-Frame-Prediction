@@ -30,19 +30,19 @@ After frame extraction from source videos, the dataset will have 3 main folders 
 
 ### Finetune
 
--Update the data_path, cond_path, cond_path2, data_path_val, cond_path_val, and cond_path2_val in ffp_lora_double_cond.sh file with target_frames, previous_frames, processed_frames folders of training and vaidation datasets
+- Update the data_path, cond_path, cond_path2, data_path_val, cond_path_val, and cond_path2_val in ffp_lora_double_cond.sh file with target_frames, previous_frames, processed_frames folders of training and vaidation datasets
 - chmod +x ffp_lora_double_cond.sh
 - ./ffp_lora_double_cond.sh
 
 
 ### Evaluate
 
--Update the previous_frames, target_frames, processed_frames, and processed_frames_relaxed_cleaned folders of test data in the evaluate_ffp_double_cond_batch.py file
+- Update the previous_frames, target_frames, processed_frames, and processed_frames_relaxed_cleaned folders of test data in the evaluate_ffp_double_cond_batch.py file
 - python3 evaluate_ffp_double_cond_batch.py
 
 ### Evaluate Baseline
 
--Update the previous_frames and target_frames folders of test data in the evaluate_baseline.py
+- Update the previous_frames and target_frames folders of test data in the evaluate_baseline.py
 - python3 evaluate_baseline.py
 
 
