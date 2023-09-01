@@ -1,6 +1,6 @@
 # Future Frame Prediction with Stable Diffusion Model
 
-This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame prediction and inference using finetuned model.
+This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame prediction and inference using the fine-tuned model.
 
 # Setup
 
@@ -15,7 +15,7 @@ This shows how to Finetune stable-diffusion-inpainting checkpoint for future fra
 
 ### Data Preparation for training and inference
 
-Data Source: tennis swing videos from https://www.crcv.ucf.edu/research/data-sets/ucf-youtube-action/
+Data Source: Tennis swing videos from https://www.crcv.ucf.edu/research/data-sets/ucf-youtube-action/
 
 After frame extraction from source videos, the dataset will have 3 main folders prev_prevous_frames, previous_frames, and  target_frames, containing corresponding consecutive 3 frames of each data sample. Another 2 folders are created, named processed_frames and processed_frames_relaxed_cleaned, containing the corresponding binary masks for FFP-LDM and the other binary masks for background correction. Files in each folder corresponding to the same sample have the same file name.
 
