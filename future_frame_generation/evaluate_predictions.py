@@ -3,6 +3,12 @@ from PIL import Image
 import numpy as np
 from skimage import io
 from skimage.metrics import structural_similarity as ssim
+import re
+import os
+from PIL import Image
+import numpy as np
+from skimage import io
+from skimage.metrics import structural_similarity as ssim
 
 def psnr(image1_path, image2_path):
     img1 = np.array(Image.open(image1_path))
@@ -22,10 +28,14 @@ def calculate_psnr_for_matching_filenames(folder1, folder2):
 
     common_files = set(folder1_files) & set(folder2_files)
 
-    for filename in common_files:
+    for filename in folder1_files:
+        i = result = int(re.search(r'\d+', filename).group())
+        filename2 = f"ffp_doublecond_{i}.jpg"
         image1_path = os.path.join(folder1, filename)
-        image2_path = os.path.join(folder2, filename)
+        image2_path = os.path.join(folder2, filename2)
         psnr_value = psnr(image1_path, image2_path)
+        if psnr_value<30:
+            print (filename)
         psnr_list.append((filename, psnr_value))
 
     return psnr_list
@@ -44,11 +54,12 @@ def calculate_ssim(image_path1, image_path2):
 def calculate_ssim_between_folders(folder1, folder2):
     ssim_scores = []
     for filename in os.listdir(folder1):
-        if filename in os.listdir(folder2):
-            image_path1 = os.path.join(folder1, filename)
-            image_path2 = os.path.join(folder2, filename)
-            score = calculate_ssim(image_path1, image_path2)
-            ssim_scores.append((filename, score))
+        i = result = int(re.search(r'\d+', filename).group())
+        filename2 = f"ffp_doublecond_{i}.jpg"
+        image_path1 = os.path.join(folder1, filename)
+        image_path2 = os.path.join(folder2, filename2)
+        score = calculate_ssim(image_path1, image_path2)
+        ssim_scores.append((filename, score))
     return ssim_scores
 
 def calculate_average_ssim(folder1, folder2):
@@ -58,13 +69,10 @@ def calculate_average_ssim(folder1, folder2):
     return average_ssim
 
 # Example usage:
-folder1_path = "/scratch/melonie/test_large_new/previous_frames"
-folder2_path = "/scratch/melonie/test_large_new/target_frames"
+folder1_path = "/scratch/melonie/test_large/target_frames"
+folder2_path = "/scratch/melonie/test_large/generated_frames"
 psnr_results = calculate_average_psnr(folder1_path, folder2_path)
 print("PSNR", psnr_results)
 
 ssim_results = calculate_average_ssim(folder1_path, folder2_path)
 print("SSIM", ssim_results)
-
-
-

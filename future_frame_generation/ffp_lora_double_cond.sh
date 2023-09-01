@@ -7,7 +7,7 @@ export COND_PATH_VAL="/scratch/melonie/val_large/previous_frames"
 export COND_PATH2_VAL="/scratch/melonie/val_large/processed_frames"
 export TEXT_TARGET="tennis"
 export MODEL_IN="checkpoint-200000"
-export MODEL_OUT="models/fully_trained_ddpm"
+export MODEL_OUT="models/fully_trained"
 
 accelerate launch --mixed_precision="fp16"  ffp.py \
   --pretrained_model_name_or_path=$MODEL_NAME \

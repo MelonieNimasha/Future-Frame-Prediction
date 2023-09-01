@@ -62,7 +62,7 @@ model_path = "models/fully_trained_ddpm"
 model_base = "runwayml/stable-diffusion-inpainting" 
 
 pipe = StableDiffusionInpaintPipeline.from_pretrained(model_base, torch_dtype=torch.float16)
-pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
+pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
 
 pipe.unet.load_attn_procs(model_path)
 pipe.to("cuda")
@@ -72,10 +72,10 @@ guidance_scale=0
 num_samples = 40
 generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to get different results
 
-previous_frames = "/scratch/melonie/val_large/previous_frames"
-target_frames = "/scratch/melonie/val_large/target_frames"
-processed_frames = "/scratch/melonie/val_large/processed_frames"
-processed_frames_relaxed = "/scratch/melonie/val_large/processed_frames_relaxed_cleaned"
+previous_frames = "/scratch/melonie/test_large_new/previous_frames"
+target_frames = "/scratch/melonie/test_large_new/target_frames"
+processed_frames = "/scratch/melonie/test_large_new/processed_frames"
+processed_frames_relaxed = "/scratch/melonie/test_large_new/processed_frames_relaxed_cleaned"
 # previous_frames = "previous_frames"
 # processed_frames = "processed_frames"
 # target_frames = "target_frames"
@@ -103,8 +103,8 @@ for i in range(len(previous)):
     process_image = open_image(process_path, im_type = "L").resize((512, 512))
     processed_image = open_image(processed_path, im_type = "L").resize((512, 512))
     
-
-    images = pipe(
+    print("a")
+    images0 = pipe(
         prompt=prompt,
         image=previous_image,
         mask_image=process_image,
@@ -112,6 +112,26 @@ for i in range(len(previous)):
         generator=generator,
         num_images_per_prompt=num_samples,
     ).images
+    images1 = pipe(
+        prompt=prompt,
+        image=previous_image,
+        mask_image=process_image,
+        guidance_scale=guidance_scale,
+        generator=generator,
+        num_images_per_prompt=num_samples,
+    ).images
+    images2 = pipe(
+        prompt=prompt,
+        image=previous_image,
+        mask_image=process_image,
+        guidance_scale=guidance_scale,
+        generator=generator,
+        num_images_per_prompt=num_samples,
+    ).images
+
+    images = images0 + images1 + images2
+
+    print("b")
 
 
 # Assuming you already have 'image', 'image2', 'image3', and 'images' defined
@@ -127,11 +147,11 @@ for i in range(len(previous)):
     max_psnr_index = np.argmax(psnr_values)
 
     # Save the image with maximum PSNR
-    if os.path.exists("/scratch/melonie/val_large/generated_frames"):
+    if os.path.exists("/scratch/melonie/test_large/generated_frames"):
         print()
     else:
-        os.mkdir("/scratch/melonie/val_large/generated_frames")
-    out_path = f"/scratch/melonie/val_large/generated_frames/ffp_doublecond_{i+start}.jpg"
+        os.mkdir("/scratch/melonie/test_large_new/generated_frames")
+    out_path = f"/scratch/melonie/test_large_new/generated_frames/ffp_doublecond_{i+start}.jpg"
     # out_path = f"generated_frames/ffp_doublecond_{i}.jpg"
     
     im_out = replace_pixels(processed_image, previous_image, images[max_psnr_index])
