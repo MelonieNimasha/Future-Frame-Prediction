@@ -21,7 +21,7 @@ pip3 install git+https://github.com/huggingface/diffusers
 
 ### Data Preparation for training and inference
 
-The dataset contains 3 main folders prev_prevous_frames, previous_frames, and  target_frames, containing corresponding consecutive 3 frames of each data sample. Another 2 folders are created, named processed_frames and processed_frames_relaxed_cleaned, containg the corresponding binary masks for FFP-LDM and the other binary masks for background correction
+<The dataset contains 3 main folders prev_prevous_frames, previous_frames, and  target_frames, containing corresponding consecutive 3 frames of each data sample. Another 2 folders are created, named processed_frames and processed_frames_relaxed_cleaned, containg the corresponding binary masks for FFP-LDM and the other binary masks for background correction>
 
 
 pip3 install cv2
@@ -32,8 +32,7 @@ cd future_Frame_Generation/data_prep
 <br />
 python3 frame_extractor.py <path-to-folder_of_videos>
 <br />
-<br />
-Update input_folder1, input_folder2 and output_folder2 in the mask2_creator.py with folders path to required prev_prevous_frames folder, previous_frames folder and the output folder to contain background correction mask
+<Update input_folder1, input_folder2 and output_folder2 in the mask2_creator.py with folders path to required prev_prevous_frames folder, previous_frames folder and the output folder to contain background correction mask>
 <br />
 python3 mask2_creator.py
 
@@ -41,7 +40,7 @@ python3 mask2_creator.py
 
 ### Finetune
 
-Update the data_path, cond_path, cond_path2, data_path_val, cond_path_val, and cond_path2_val with target_frames, previous_frames, processed_frames folders of training and vaidation datasets
+<Update the data_path, cond_path, cond_path2, data_path_val, cond_path_val, and cond_path2_val in ffp_lora_double_cond.sh file with target_frames, previous_frames, processed_frames folders of training and vaidation datasets>
 <br />
 chmod +x ffp_lora_double_cond.sh
 <br />
@@ -50,13 +49,13 @@ chmod +x ffp_lora_double_cond.sh
 
 ### Evaluate
 
-Update the previous_frames, target_frames, processed_frames, and processed_frames_relaxed_cleaned folders of test data
+<Update the previous_frames, target_frames, processed_frames, and processed_frames_relaxed_cleaned folders of test data in the evaluate_ffp_double_cond_batch.py file>
 <br />
 python3 evaluate_ffp_double_cond_batch.py
 
 ### Evaluate Baseline
 
-Update the previous_frames and target_frames folders of test data
+<Update the previous_frames and target_frames folders of test data in the evaluate_baseline.py>
 <br />
 python3 evaluate_baseline.py
 
