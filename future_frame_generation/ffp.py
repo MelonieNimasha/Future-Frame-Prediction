@@ -4,6 +4,7 @@ import math
 import os
 import random
 from pathlib import Path
+import pickle
 
 import numpy as np
 import torch
@@ -65,6 +66,29 @@ def parse_args():
 
     parser.add_argument(
         "--cond_data_dir2",
+        type=str,
+        default=None,
+        required=True,
+        help="A folder containing the training data of previous of previous images.",
+    )
+
+    parser.add_argument(
+        "--instance_data_dir_val",
+        type=str,
+        default=None,
+        required=True,
+        help="A folder containing the training data of instance images.",
+    )
+    parser.add_argument(
+        "--cond_data_dir_val",
+        type=str,
+        default=None,
+        required=True,
+        help="A folder containing the training data of previous images.",
+    )
+
+    parser.add_argument(
+        "--cond_data_dir2_val",
         type=str,
         default=None,
         required=True,
@@ -134,6 +158,9 @@ def parse_args():
     parser.add_argument("--train_text_encoder", action="store_true", help="Whether to train the text encoder")
     parser.add_argument(
         "--train_batch_size", type=int, default=4, help="Batch size (per device) for the training dataloader."
+    )
+    parser.add_argument(
+        "--val_batch_size", type=int, default=4, help="Batch size (per device) for the training dataloader."
     )
     parser.add_argument(
         "--sample_batch_size", type=int, default=4, help="Batch size (per device) for sampling images."
@@ -468,7 +495,7 @@ def main():
     elif args.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
 
-    # Move text_encode and vae to gpu.
+    # ad.
     # For mixed precision training we cast the text_encoder and vae weights to half-precision
     # as these models are only used for inference, keeping weights in full precision is not required.
     unet.to(accelerator.device, dtype=weight_dtype)
@@ -554,6 +581,18 @@ def main():
         center_crop=args.center_crop,
     )
 
+    val_dataset = DreamBoothDataset(
+        instance_data_root=args.instance_data_dir_val,
+        cond_data_root=args.cond_data_dir_val,
+        cond_data_root2=args.cond_data_dir2_val,
+        instance_prompt=args.instance_prompt,
+        class_data_root=args.class_data_dir if args.with_prior_preservation else None,
+        class_prompt=args.class_prompt,
+        tokenizer=tokenizer,
+        size=args.resolution,
+        center_crop=args.center_crop,
+    )
+
     def collate_fn(examples):
         input_ids = [example["instance_prompt_ids"] for example in examples]
         pixel_values = [example["instance_images"] for example in examples]
@@ -585,6 +624,10 @@ def main():
         train_dataset, batch_size=args.train_batch_size, shuffle=True, collate_fn=collate_fn
     )
 
+    val_dataloader = torch.utils.data.DataLoader(
+        val_dataset, batch_size=args.val_batch_size, shuffle=True, collate_fn=collate_fn
+    )
+
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
@@ -600,11 +643,10 @@ def main():
     )
 
     # Prepare everything with our `accelerator`.
-    lora_layers, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        lora_layers, optimizer, train_dataloader, lr_scheduler
+    lora_layers, optimizer, train_dataloader, lr_scheduler, val_dataloader = accelerator.prepare(
+        lora_layers, optimizer, train_dataloader, lr_scheduler, val_dataloader
     )
     # accelerator.register_for_checkpointing(lr_scheduler)
-
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
     if overrode_max_train_steps:
@@ -658,6 +700,8 @@ def main():
     # Only show the progress bar once on each machine.
     progress_bar = tqdm(range(global_step, args.max_train_steps), disable=not accelerator.is_local_main_process)
     progress_bar.set_description("Steps")
+    loss_list = []
+    loss_list_val = []
 
     for epoch in range(first_epoch, args.num_train_epochs):
         unet.train()
@@ -734,6 +778,7 @@ def main():
                 else:
                     loss = F.mse_loss(noise_pred.float(), target.float(), reduction="mean")
 
+                
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
                     params_to_clip = lora_layers.parameters()
@@ -760,7 +805,87 @@ def main():
             if global_step >= args.max_train_steps:
                 break
 
+        loss_list.append(loss.cpu().detach().numpy())
         accelerator.wait_for_everyone()
+
+        unet.eval()
+        for step, batch in enumerate(val_dataloader):
+            # Skip steps until we reach the resumed step
+            if args.resume_from_checkpoint and epoch == first_epoch and step < resume_step:
+                if step % args.gradient_accumulation_steps == 0:
+                    progress_bar.update(1)
+                continue
+
+            with accelerator.accumulate(unet):
+                # Convert images to latent space
+
+                latents = vae.encode(batch["pixel_values"].to(dtype=weight_dtype)).latent_dist.sample()
+                latents = latents * vae.config.scaling_factor
+
+                # Convert masked images to latent space
+                masked_latents = vae.encode(
+                    batch["masked_images"].reshape(batch["pixel_values"].shape).to(dtype=weight_dtype)
+                ).latent_dist.sample()
+                masked_latents = masked_latents * vae.config.scaling_factor
+
+                masks = batch["masks"]
+                # resize the mask to latents shape as we concatenate the mask to the latents
+                mask = torch.stack(
+                    [
+                        torch.nn.functional.interpolate(mask, size=(args.resolution // 8, args.resolution // 8))
+                        for mask in masks
+                    ]
+                ).to(dtype=weight_dtype)
+                mask = mask.reshape(-1, 1, args.resolution // 8, args.resolution // 8)
+
+                # Sample noise that we'll add to the latents
+                noise = torch.randn_like(latents)
+                bsz = latents.shape[0]
+                # Sample a random timestep for each image
+                timesteps = torch.randint(0, noise_scheduler.config.num_train_timesteps, (bsz,), device=latents.device)
+                timesteps = timesteps.long()
+
+                # Add noise to the latents according to the noise magnitude at each timestep
+                # (this is the forward diffusion process)
+                noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
+
+                # concatenate the noised latents with the mask and the masked latents
+                latent_model_input = torch.cat([noisy_latents, mask, masked_latents], dim=1)
+
+                # Get the text embedding for conditioning
+                encoder_hidden_states = text_encoder(batch["input_ids"])[0]
+
+                # Predict the noise residual
+                noise_pred = unet(latent_model_input, timesteps, encoder_hidden_states).sample
+
+                # Get the target for loss depending on the prediction type
+                if noise_scheduler.config.prediction_type == "epsilon":
+                    target = noise
+                elif noise_scheduler.config.prediction_type == "v_prediction":
+                    target = noise_scheduler.get_velocity(latents, noise, timesteps)
+                else:
+                    raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
+
+                if args.with_prior_preservation:
+                    # Chunk the noise and noise_pred into two parts and compute the loss on each part separately.
+                    noise_pred, noise_pred_prior = torch.chunk(noise_pred, 2, dim=0)
+                    target, target_prior = torch.chunk(target, 2, dim=0)
+
+                    # Compute instance loss
+                    loss = F.mse_loss(noise_pred.float(), target.float(), reduction="none").mean([1, 2, 3]).mean()
+
+                    # Compute prior loss
+                    prior_loss = F.mse_loss(noise_pred_prior.float(), target_prior.float(), reduction="mean")
+
+                    # Add the prior loss to the instance loss.
+                    loss = loss + args.prior_loss_weight * prior_loss
+                else:
+                    loss = F.mse_loss(noise_pred.float(), target.float(), reduction="mean")
+
+        loss_list_val.append(loss.cpu().detach().numpy())
+
+        accelerator.wait_for_everyone()
+
 
     # Save the lora layers
     if accelerator.is_main_process:
@@ -776,6 +901,10 @@ def main():
             )
 
     accelerator.end_training()
+    with open('loss_plots/losses.pkl', 'wb') as f:
+        pickle.dump(loss_list, f)
+    with open('loss_plots/losses_val.pkl', 'wb') as f:
+        pickle.dump(loss_list_val, f)
 
 
 if __name__ == "__main__":

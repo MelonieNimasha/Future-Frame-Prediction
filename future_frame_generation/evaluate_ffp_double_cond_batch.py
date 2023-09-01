@@ -10,7 +10,7 @@ from skimage.metrics import structural_similarity as ssim
 from torchvision import transforms
 
 import PIL
-from diffusers import StableDiffusionInpaintPipeline, DPMSolverMultistepScheduler
+from diffusers import StableDiffusionInpaintPipeline, DPMSolverMultistepScheduler, DDPMScheduler, DDIMScheduler
 
 
 image_transforms = transforms.Compose([
@@ -54,8 +54,10 @@ def replace_pixels(new_image, image1, image2):
 
     return result_image
 
+
+
 # LoRA weights ~3 MB
-model_path = "models/outsample_test"
+model_path = "models/fully_trained_ddpm"
 
 model_base = "runwayml/stable-diffusion-inpainting" 
 
@@ -67,31 +69,33 @@ pipe.to("cuda")
 
 prompt = "tennis"
 guidance_scale=0
-num_samples = 4
+num_samples = 40
 generator = torch.Generator(device="cuda").manual_seed(0) # change the seed to get different results
 
-previous_frames = "data_prep/one_sample_test/previous_frames"
-target_frames = "data_prep/one_sample_test/target_frames"
-processed_frames = "data_prep/one_sample_test/processed_frames"
-processed_frames_relaxed = "data_prep/one_sample_test/processed_frames_relaxed"
+previous_frames = "/scratch/melonie/val_large/previous_frames"
+target_frames = "/scratch/melonie/val_large/target_frames"
+processed_frames = "/scratch/melonie/val_large/processed_frames"
+processed_frames_relaxed = "/scratch/melonie/val_large/processed_frames_relaxed_cleaned"
 # previous_frames = "previous_frames"
 # processed_frames = "processed_frames"
 # target_frames = "target_frames"
 
-previous = os.listdir(previous_frames) 
-target = os.listdir(target_frames)  
-process = os.listdir(processed_frames)  
-processed = os.listdir(processed_frames_relaxed) 
+previous = os.listdir(previous_frames)
+target = os.listdir(target_frames) 
+process = os.listdir(processed_frames) 
+processed = os.listdir(processed_frames_relaxed)
 
 # Initialize lists to store results
 all_psnr_values = []
 all_ssim_values = []
+start = 0
 
 for i in range(len(previous)):
-    prev_path = os.path.join(previous_frames, previous[i])
-    target_path = os.path.join(target_frames, target[i])
-    process_path = os.path.join(processed_frames, process[i])
-    processed_path = os.path.join(processed_frames_relaxed, processed[i])
+    name = f"frame_{i+start}.jpg"
+    prev_path = os.path.join(previous_frames, name)
+    target_path = os.path.join(target_frames, name)
+    process_path = os.path.join(processed_frames, name)
+    processed_path = os.path.join(processed_frames_relaxed, name)
 
 
     previous_image = open_image(prev_path).resize((512, 512))
@@ -123,15 +127,16 @@ for i in range(len(previous)):
     max_psnr_index = np.argmax(psnr_values)
 
     # Save the image with maximum PSNR
-    if os.path.exists("data_prep/one_sample_test/generated_frames") and os.path.isdir("data_prep/one_sample_test/generated_frames"):
+    if os.path.exists("/scratch/melonie/val_large/generated_frames"):
         print()
     else:
-        os.mkdir("data_prep/one_sample_test/generated_frames")
-    out_path = f"data_prep/one_sample_test/generated_frames/ffp_doublecond_{i}.jpg"
+        os.mkdir("/scratch/melonie/val_large/generated_frames")
+    out_path = f"/scratch/melonie/val_large/generated_frames/ffp_doublecond_{i+start}.jpg"
     # out_path = f"generated_frames/ffp_doublecond_{i}.jpg"
     
     im_out = replace_pixels(processed_image, previous_image, images[max_psnr_index])
     generated_np_new = np.array(im_out)
+    # images[max_psnr_index].save(name)
     im_out.save(out_path)
     print("image ",out_path, " saved")
 
