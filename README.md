@@ -1,6 +1,6 @@
 # Future Frame Prediction with Stable Diffusion Model
 
-This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame prediction and inferencing using finetuned model.
+This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame prediction and inference using finetuned model.
 
 # Setup
 
