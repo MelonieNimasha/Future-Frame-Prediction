@@ -5,8 +5,7 @@ This shows how to Finetune stable-diffusion-inpainting checkpoint for future fra
 # Setup
 
 - conda create --name env_name
-<br />
-conda activate env_name
+- conda activate env_name
 <br />
 pip3 install diffusers["torch"] transformers
 <br />
