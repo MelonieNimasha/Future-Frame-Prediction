@@ -1,6 +1,6 @@
 # Future Frame Generation with Stable Diffusion Model
 
-This shows how to Finetune stable-diffusion-inpainting checkpoint for future frame generation and inferencing using finetuned model.
+This shows how to finetune stable-diffusion-inpainting checkpoint with LoRA for future frame generation and inferencing using finetuned model.
 
 # Setup
 
